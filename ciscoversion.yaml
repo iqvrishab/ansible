@@ -11,12 +11,13 @@
           - show version
       register: version_output
 
-    - name: Extract IOS version safely
+    - name: Extract IOS version safely (bulletproof)
       set_fact:
         ios_version: >-
           {{
             (version_output.stdout[0]
-            | regex_search('Version\\s+([^,\\s]+)', '\\1'))
+             | regex_findall('Version\\s+([^,\\s]+)')
+             | first)
             | default('UNKNOWN', true)
           }}
 
