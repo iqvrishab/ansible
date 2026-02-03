@@ -5,28 +5,22 @@
   connection: network_cli
 
   tasks:
-    - name: Run 'show version'
+    - name: Run show version
       cisco.ios.ios_command:
         commands:
           - show version
-      register: ios_version_raw
+      register: version_output
 
     - name: Extract IOS version
       set_fact:
         ios_version: >-
-          {{ ios_version_raw.stdout[0]
-             | regex_search('Version ([0-9A-Za-z.()]+)', '\\1') }}
+          {{
+            version_output.stdout[0]
+            | regex_search('Version ([^,]+)', '\\1')
+          }}
 
-    - name: Extract device model
-      set_fact:
-        device_model: >-
-          {{ ios_version_raw.stdout[0]
-             | regex_search('cisco ([A-Za-z0-9-]+)', '\\1') }}
-
-    - name: Display router information
+    - name: Show version result
       debug:
         msg:
-          - "Hostname      : {{ inventory_hostname }}"
-          - "Management IP : {{ ansible_host }}"
-          - "Device Model  : {{ device_model | default('UNKNOWN') }}"
-          - "IOS Version   : {{ ios_version | default('UNKNOWN') }}"
+          - "Device: {{ inventory_hostname }}"
+          - "IOS Version: {{ ios_version }}"
