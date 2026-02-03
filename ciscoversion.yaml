@@ -11,15 +11,16 @@
           - show version
       register: version_output
 
-    - name: Extract IOS version
+    - name: Extract IOS version safely
       set_fact:
         ios_version: >-
           {{
-            version_output.stdout[0]
-            | regex_search('Version ([^,]+)', '\\1')
+            (version_output.stdout[0]
+            | regex_search('Version\\s+([^,\\s]+)', '\\1'))
+            | default('UNKNOWN', true)
           }}
 
-    - name: Show version result
+    - name: Show parsed IOS version
       debug:
         msg:
           - "Device: {{ inventory_hostname }}"
